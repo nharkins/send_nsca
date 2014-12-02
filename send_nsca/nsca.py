@@ -355,7 +355,11 @@ class NscaSender(object):
             crypter = self._cached_crypters[conn]
             packet = _pack_packet(host, service, state, description, timestamp)
             packet = crypter.encrypt(packet)
-            conn.sendall(packet)
+            try:
+                conn.sendall(packet)
+            except socket.error as e:
+                raise socket.error('%s (to %s:%s)'
+                                   % (e, self.remote_host, self.port))
 
     def send_host(self, host, state, description):
         return self.send_service(host, '', state, description)
